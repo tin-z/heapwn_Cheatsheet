@@ -60,7 +60,7 @@ Heap Exploitation can be hard, this repo is more a memo than a cheatsheet.
  shrinking or extending chunk, so we can craft an implicit chunk and use other technique attacks
 </br></br>
 <li><b>House of Mind:</b></li>
- in this scenario we need to fake an arena, and to craft a special chunk (this chunk should be the first in heap).
+ in this scenario we need to fake an arena, and to craft a special chunk (this chunk should be the first in a thread heap, in fact is the heap_info struct).
  At the end of the day, this is what we want to execute:
  
  ```
@@ -107,9 +107,23 @@ Heap Exploitation can be hard, this repo is more a memo than a cheatsheet.
  we are able to corrupt smallbin, by crafting fake chunk, with; fake_chunk.bk=fake_chunk2, fake_chunk2.fd=fake_chunk1, ptr.bk=fake_chunk, fake_chunk.fd=ptr.
  we need first to pass to unsortedbin (LIFO)
 </br></br>
-<li><b>House of Einherjar: #TODO</b></li>
-<li><b>Tcache corrupt:#TODO</b></li>
-<li><b>Tcache house of spirit:#TODO</b></li>
+ <li><b>House of Einherjar:</b></li>
+ This attack also revolves around making 'malloc' return a nearly arbitrary pointer. We can think of it as House of Force
+ but instead we also overwrite the prev_inuse bit of an adjacent chunk, and setting his previous size as follows:
+
+ ```
+  size_t fake_chunk[4] = {0};
+  fake_chunk[1] = 0x100; //not fastbin range
+  chunk[-2] = &chunk[-2] - (size_t)&fake_chunk;
+ ```
+</br>
+ <li><b>Tcache corrupt:</b></li>
+ We are able to overwrite the fd pointer of a chunk in tcachebin.
+</br></br>
+<li><b>Tcache house of spirit:</b></li>
+ We are able to freed a fake chunk, at least we need to set his size <= 0x410
+</br></br>
+<li><b>  ptmalloc fanzine  #TODO</b></li>
 <li><b>  ...  #TODO</b></li>
 
 </ol>
@@ -127,4 +141,7 @@ Heap Exploitation can be hard, this repo is more a memo than a cheatsheet.
 
 * [Linux Heap Exploitation Practice](https://github.com/str8outtaheap/heapwn)
 
+* [ptmalloc fanzine](http://tukan.farm/2016/07/26/ptmalloc-fanzine/)
+
 * [Post List Linux Heap](https://dangokyo.me/post-list/)
+
